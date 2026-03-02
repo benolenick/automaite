@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connect Desktop — Automaite</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace;
+    background: #0a0a0f; color: #e4e4e7;
+    display: flex; justify-content: center; align-items: center;
+    min-height: 100vh;
+  }
+  .card {
+    background: #18181b; border: 1px solid #27272a; border-radius: 12px;
+    padding: 40px; max-width: 400px; width: 90%; text-align: center;
+  }
+  h1 { font-size: 1.5rem; margin-bottom: 8px; }
+  .subtitle { color: #71717a; margin-bottom: 24px; }
+  .code {
+    font-size: 2.5rem; font-weight: bold; font-family: 'Consolas', monospace;
+    color: #a78bfa; letter-spacing: 4px; margin: 20px 0;
+    padding: 16px; background: #0a0a0f; border-radius: 8px;
+    border: 1px solid #27272a;
+  }
+  .btn {
+    background: #7c3aed; color: white; border: none; border-radius: 8px;
+    padding: 14px 32px; font-size: 1rem; cursor: pointer; width: 100%;
+    font-weight: 600; margin-top: 16px; transition: background 0.2s;
+  }
+  .btn:hover { background: #6d28d9; }
+  .btn:disabled { background: #3f3f46; cursor: not-allowed; }
+  .status { margin-top: 16px; padding: 12px; border-radius: 8px; }
+  .status.success { background: #052e16; color: #4ade80; border: 1px solid #166534; }
+  .status.error { background: #450a0a; color: #f87171; border: 1px solid #7f1d1d; }
+  .status.info { background: #172554; color: #60a5fa; border: 1px solid #1e3a5f; }
+  .login-prompt { margin-top: 16px; color: #71717a; font-size: 0.9rem; }
+  #google-btn-container { display: flex; justify-content: center; margin-top: 16px; }
+  .manual { margin-top: 24px; color: #71717a; font-size: 0.85rem; }
+  .manual input {
+    background: #0a0a0f; border: 1px solid #27272a; color: #e4e4e7;
+    padding: 8px 12px; border-radius: 6px; font-family: monospace;
+    font-size: 1rem; width: 140px; text-align: center; margin-top: 8px;
+    text-transform: uppercase; letter-spacing: 2px;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Connect Desktop Agent</h1>
+  <p class="subtitle">Approve this device to link it to your account</p>
+
+  <div id="code-display" style="display:none">
+    <p style="color:#71717a; font-size:0.9rem;">Confirm this code matches your desktop app:</p>
+    <div class="code" id="user-code"></div>
+    <button class="btn" id="approve-btn">Connect This Computer</button>
+    <div id="status"></div>
+  </div>
+
+  <div id="manual-entry" style="display:none">
+    <p style="color:#71717a; margin-bottom:16px;">Enter the code shown in your desktop app:</p>
+    <div class="manual">
+      <input type="text" id="manual-code" placeholder="XXXX-YYYY" maxlength="9">
+    </div>
+    <button class="btn" id="manual-approve-btn" style="margin-top:16px;">Connect</button>
+    <div id="manual-status"></div>
+  </div>
+
+  <div id="login-needed" style="display:none">
+    <p class="login-prompt">Sign in with Google to connect your desktop agent:</p>
+    <div id="google-btn-container"></div>
+  </div>
+
+  <div id="loading">Checking authentication...</div>
+</div>
+
+<script src="/connect.js"></script>
+</body>
+</html>

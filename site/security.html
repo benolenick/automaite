@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Security - Automaite Terminal</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background-color: #0A0A0F; color: #D1D5DB; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 16px; line-height: 1.7; }
+    a { color: #7C3AED; text-decoration: none; }
+    a:hover { color: #A78BFA; text-decoration: underline; }
+    header { border-bottom: 1px solid #1E1E2E; padding: 1.25rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+    .logo { font-size: 1.1rem; font-weight: 600; color: #F9FAFB; letter-spacing: 0.01em; }
+    .logo span { color: #7C3AED; }
+    .back-link { font-size: 0.875rem; color: #9CA3AF; }
+    .back-link:hover { color: #F9FAFB; text-decoration: none; }
+
+    main { max-width: 800px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+
+    .page-hero { margin-bottom: 3rem; }
+    .page-hero h1 { font-size: 2rem; font-weight: 700; color: #F9FAFB; margin-bottom: 0.75rem; }
+    .page-hero .subtitle { font-size: 1.05rem; color: #9CA3AF; max-width: 600px; }
+
+    .last-updated { font-size: 0.8rem; color: #6B7280; margin-top: 1rem; }
+
+    /* Summary cards */
+    .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 3rem; }
+    .summary-card { background: #111118; border: 1px solid #1E1E2E; border-radius: 10px; padding: 1.25rem 1.25rem 1rem; }
+    .summary-card .card-icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    .summary-card .card-title { font-size: 0.8rem; font-weight: 600; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.3rem; }
+    .summary-card .card-value { font-size: 0.975rem; color: #F9FAFB; font-weight: 500; }
+
+    /* Sections */
+    section { margin-bottom: 3rem; }
+    .section-header { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1rem; border-bottom: 1px solid #1E1E2E; padding-bottom: 0.75rem; }
+    .section-header .section-icon { font-size: 1.25rem; line-height: 1; }
+    .section-header h2 { font-size: 1.2rem; font-weight: 600; color: #F9FAFB; }
+
+    p { color: #D1D5DB; margin-bottom: 1rem; }
+    p:last-child { margin-bottom: 0; }
+
+    /* Subsections */
+    .subsection { margin-top: 1.5rem; }
+    .subsection h3 { font-size: 0.95rem; font-weight: 600; color: #E5E7EB; margin-bottom: 0.5rem; }
+
+    /* Lists */
+    ul, ol { padding-left: 1.4rem; margin-bottom: 1rem; }
+    li { color: #D1D5DB; margin-bottom: 0.35rem; }
+    li:last-child { margin-bottom: 0; }
+
+    /* Transparency table */
+    .transparency-block { background: #111118; border: 1px solid #1E1E2E; border-radius: 10px; overflow: hidden; margin-top: 1rem; }
+    .t-row { display: flex; align-items: flex-start; gap: 0; border-bottom: 1px solid #1E1E2E; }
+    .t-row:last-child { border-bottom: none; }
+    .t-label { flex: 0 0 200px; padding: 0.85rem 1.1rem; font-size: 0.875rem; font-weight: 500; color: #9CA3AF; border-right: 1px solid #1E1E2E; }
+    .t-value { flex: 1; padding: 0.85rem 1.1rem; font-size: 0.875rem; color: #D1D5DB; }
+    .t-value.yes { color: #34D399; }
+    .t-value.no { color: #F87171; }
+    .t-value.partial { color: #FBBF24; }
+
+    @media (max-width: 560px) {
+      .t-row { flex-direction: column; }
+      .t-label { flex: none; border-right: none; border-bottom: 1px solid #1E1E2E; padding-bottom: 0.4rem; }
+    }
+
+    /* Code / technical highlight */
+    .tech-note { background: #0D0D14; border: 1px solid #1E1E2E; border-left: 3px solid #7C3AED; border-radius: 6px; padding: 0.85rem 1rem; margin: 0.75rem 0; font-size: 0.875rem; color: #A78BFA; font-family: "Fira Mono", "Cascadia Code", "Consolas", monospace; }
+
+    /* Contact box */
+    .contact-box { background: #111118; border: 1px solid #1E1E2E; border-radius: 10px; padding: 1.75rem; text-align: center; margin-top: 1rem; }
+    .contact-box .contact-icon { font-size: 2rem; margin-bottom: 0.75rem; }
+    .contact-box h3 { font-size: 1.05rem; font-weight: 600; color: #F9FAFB; margin-bottom: 0.5rem; }
+    .contact-box p { color: #9CA3AF; font-size: 0.925rem; margin-bottom: 1rem; }
+    .contact-box .contact-email { display: inline-block; background: #7C3AED; color: #fff; padding: 0.55rem 1.4rem; border-radius: 6px; font-weight: 600; font-size: 0.95rem; text-decoration: none; }
+    .contact-box .contact-email:hover { background: #6D28D9; color: #fff; text-decoration: none; }
+
+    /* Footer */
+    footer { border-top: 1px solid #1E1E2E; padding: 2.5rem 2rem; }
+    .footer-inner { max-width: 800px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 2.5rem; justify-content: space-between; align-items: flex-start; }
+    .footer-brand .logo { font-size: 1rem; }
+    .footer-brand p { font-size: 0.8rem; color: #6B7280; margin-top: 0.4rem; }
+    .footer-col h4 { font-size: 0.75rem; font-weight: 600; color: #6B7280; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 0.6rem; }
+    .footer-col a { display: block; font-size: 0.85rem; color: #9CA3AF; margin-bottom: 0.3rem; }
+    .footer-col a:hover { color: #F9FAFB; }
+    .footer-col a.active { color: #A78BFA; }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="/" class="logo">automaite<span>.</span></a>
+  <a href="/" class="back-link">&larr; Back to app</a>
+</header>
+
+<main>
+
+  <div class="page-hero">
+    <h1>Security Overview</h1>
+    <p class="subtitle">How Automaite protects your AI agents, your credentials, and your sessions — and what we can and cannot see.</p>
+    <p class="last-updated">Last updated: March 2026</p>
+  </div>
+
+  <!-- Summary cards -->
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="card-icon">🖥️</div>
+      <div class="card-title">AI runs on</div>
+      <div class="card-value">Your computer</div>
+    </div>
+    <div class="summary-card">
+      <div class="card-icon">🔑</div>
+      <div class="card-title">API keys stored</div>
+      <div class="card-value">Encrypted at rest</div>
+    </div>
+    <div class="summary-card">
+      <div class="card-icon">🔒</div>
+      <div class="card-title">Vault credentials</div>
+      <div class="card-value">Zero-knowledge relay</div>
+    </div>
+    <div class="summary-card">
+      <div class="card-icon">📡</div>
+      <div class="card-title">Terminal sessions</div>
+      <div class="card-value">Relayed, never logged</div>
+    </div>
+  </div>
+
+  <!-- Architecture -->
+  <section>
+    <div class="section-header">
+      <span class="section-icon">🏗️</span>
+      <h2>How it works: BYOK architecture</h2>
+    </div>
+    <p>Automaite is built on a <strong>Bring Your Own Keys</strong> model. The AI agents — Claude Code, Gemini CLI, Codex — run directly on your own computer via the desktop app. Automaite's servers do not run AI models on your behalf, and your code, files, and prompts never pass through our infrastructure.</p>
+    <p>Our server acts as a <strong>pure relay</strong>: it opens an authenticated WebSocket tunnel between your browser or phone and your own computer. When you type a command on your phone, it travels over TLS to our relay, then over another TLS connection to your desktop. The relay reads just enough to route the connection — it does not inspect or store what passes through it.</p>
+    <p>This design means that even if Automaite's servers were compromised, an attacker would find nothing useful: no AI model outputs, no terminal history, no plaintext credentials.</p>
+  </section>
+
+  <!-- API keys -->
+  <section>
+    <div class="section-header">
+      <span class="section-icon">🔑</span>
+      <h2>Your API keys</h2>
+    </div>
+    <p>To launch an agent, Automaite needs to inject your Anthropic, Google, or OpenAI API key as an environment variable on your computer. You provide these keys once; from that point on the desktop app handles the injection automatically.</p>
+    <div class="subsection">
+      <h3>Encryption at rest</h3>
+      <p>Keys are stored encrypted using <strong>Fernet</strong> (AES-128-CBC with PKCS7 padding, authenticated with HMAC-SHA256). The encryption key is derived from your JWT session secret — a secret that is never written to disk on our servers.</p>
+      <div class="tech-note">Fernet(key).encrypt(api_key_bytes)  →  stored ciphertext only</div>
+    </div>
+    <div class="subsection">
+      <h3>At session start</h3>
+      <p>When you launch an agent session, the ciphertext is decrypted in memory, injected as an environment variable into the agent process, and then immediately discarded from memory. Keys are <strong>never written to logs</strong>, never echoed to the terminal, and never transmitted over the WebSocket relay.</p>
+    </div>
+    <div class="subsection">
+      <h3>What we store</h3>
+      <p>We store the <strong>encrypted ciphertext</strong> and a masked display name (e.g. "sk-ant-...xxxx") so you can identify which key is saved. We do not store the plaintext key, and our servers cannot reconstruct it without the JWT secret that is scoped to your session.</p>
+    </div>
+  </section>
+
+  <!-- Credential Vault -->
+  <section>
+    <div class="section-header">
+      <span class="section-icon">🛡️</span>
+      <h2>Credential vault</h2>
+    </div>
+    <p>The credential vault lets you store SSH keys, passwords, and secrets on your phone, gated behind biometric authentication (fingerprint or face unlock). This is entirely optional — you can use Automaite without it.</p>
+    <div class="subsection">
+      <h3>How a credential request works</h3>
+      <ol>
+        <li>A running AI agent decides it needs a credential (e.g. an SSH password to deploy code).</li>
+        <li>It sends a structured request to the relay, which forwards it to your phone.</li>
+        <li>Your phone displays the request: agent name, credential name, and the reason the agent gave.</li>
+        <li>You approve with your fingerprint or face. The credential is encrypted on-device using AES-256-GCM with an HKDF-derived key tied to the current session.</li>
+        <li>The encrypted blob travels through the relay to your desktop, where the agent process decrypts it locally.</li>
+      </ol>
+    </div>
+    <div class="subsection">
+      <h3>Zero-knowledge relay</h3>
+      <p>The relay routes the encrypted blob from your phone to your computer — it never holds the decryption key and never decrypts the credential. Even in a worst-case scenario where the relay server is fully compromised, vault credentials remain protected because the key never leaves your devices.</p>
+      <div class="tech-note">relay sees: encrypted_blob (AES-256-GCM)  →  cannot decrypt</div>
+    </div>
+    <div class="subsection">
+      <h3>Biometric gating (Android)</h3>
+      <p>On Android, credentials are stored using the <strong>Android Keystore</strong> system — a hardware-backed secure enclave. The decryption key is bound to biometric authentication and cannot be extracted from the device, even by a rooted OS.</p>
+    </div>
+  </section>
+
+  <!-- Authentication -->
+  <section>
+    <div class="section-header">
+      <span class="section-icon">🪪</span>
+      <h2>Authentication</h2>
+    </div>
+    <p>Automaite uses <strong>Google OAuth 2.0 only</strong> — there are no passwords to store, no password reset flows, and no password database to leak. Your Google account is the sole authentication factor.</p>
+    <ul>
+      <li><strong>JWT session tokens</strong> are issued after a successful OAuth exchange and stored in <code>HttpOnly, Secure</code> cookies — inaccessible to JavaScript on the page.</li>
+      <li><strong>Nonce verification</strong> on Google's ID token prevents replay attacks (each token can only be used once).</li>
+      <li><strong>Rate limiting on login:</strong> 5 failed attempts triggers a 24-hour block on that account to prevent credential stuffing.</li>
+      <li><strong>WebSocket session ownership:</strong> each WebSocket connection is validated against the authenticated user's session — you can only connect to your own agent sessions, never someone else's.</li>
+    </ul>
+  </section>
+
+  <!-- In transit -->
+  <section>
+    <div class="section-header">
+      <span class="section-icon">📡</span>
+      <h2>Data in transit</h2>
+    </div>
+    <p>All communication between your browser, phone, relay server, and desktop app travels over <strong>TLS</strong> (HTTPS and WSS). The relay is served by <strong>Caddy</strong> with automatic Let's Encrypt certificate renewal — no manual certificate management and no chance of an expired cert quietly downgrading to plaintext.</p>
+    <ul>
+      <li><strong>WebSocket rate limiting:</strong> each connection is capped at 100 messages per second to prevent abuse.</li>
+      <li><strong>Message size limit:</strong> maximum 64 KB per WebSocket frame.</li>
+      <li><strong>Origin checking:</strong> WebSocket upgrade requests are validated against allowed origins — connections from unexpected origins are rejected before the tunnel is established.</li>
+    </ul>
+  </section>
+
+  <!-- Multi-tenancy -->
+  <section>
+    <div class="section-header">
+      <span class="section-icon">🧱</span>
+      <h2>Multi-tenancy isolation</h2>
+    </div>
+    <p>Automaite is a multi-user service, and session isolation is enforced at the server level:</p>
+    <ul>
+      <li>Agent connections are registered per user email — there is no shared agent pool where one user's session could spill into another's.</li>
+      <li>Session lookup is gated by ownership: a request to attach to a session is rejected unless the authenticated user owns that session.</li>
+      <li>Users cannot enumerate, view, or interact with sessions belonging to other accounts.</li>
+    </ul>
+    <p>In short: your sessions are yours. No other Automaite user can reach them.</p>
+  </section>
+
+  <!-- What we can / cannot see -->
+  <section>
+    <div class="section-header">
+      <span class="section-icon">🔍</span>
+      <h2>What Automaite can and cannot see</h2>
+    </div>
+    <p>We believe you should know exactly what visibility we have into your activity. Here it is, plainly:</p>
+
+    <div class="transparency-block" style="margin-top:1.25rem">
+      <div class="t-row">
+        <div class="t-label">Your Google email</div>
+        <div class="t-value yes">Yes — received from OAuth, used to identify your account</div>
+      </div>
+      <div class="t-row">
+        <div class="t-label">API key contents</div>
+        <div class="t-value no">No — stored as ciphertext only; we cannot read the plaintext</div>
+      </div>
+      <div class="t-row">
+        <div class="t-label">Masked key name</div>
+        <div class="t-value yes">Yes — e.g. "sk-ant-...xxxx" so you can identify saved keys</div>
+      </div>
+      <div class="t-row">
+        <div class="t-label">Session metadata</div>
+        <div class="t-value partial">Limited — start time, agent type, duration; not session content</div>
+      </div>
+      <div class="t-row">
+        <div class="t-label">Terminal output</div>
+        <div class="t-value no">No — buffered in-memory only (256 KB scrollback); not written to disk or logs; lost on relay restart</div>
+      </div>
+      <div class="t-row">
+        <div class="t-label">Vault credentials</div>
+        <div class="t-value no">No — zero-knowledge relay; we route the encrypted blob, never the plaintext</div>
+      </div>
+      <div class="t-row">
+        <div class="t-label">Your code / files</div>
+        <div class="t-value no">No — agents run on your computer; file contents never reach our servers</div>
+      </div>
+      <div class="t-row">
+        <div class="t-label">AI model outputs</div>
+        <div class="t-value no">No — model calls go directly from your computer to the AI provider (Anthropic, Google, OpenAI)</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Open source -->
+  <section>
+    <div class="section-header">
+      <span class="section-icon">📖</span>
+      <h2>Open source (planned)</h2>
+    </div>
+    <p>We intend to release the full server and client code — including the relay, the desktop agent connector, and the crypto layer — on GitHub under an open source licence. Community members will be able to audit:</p>
+    <ul>
+      <li>The relay code: how connections are routed and what (if anything) is buffered</li>
+      <li>The agent connector: how API keys are injected and how vault requests are handled</li>
+      <li>The crypto code: the Fernet key derivation, the AES-256-GCM vault encryption, and the HKDF key schedule</li>
+    </ul>
+    <p>We are not open source yet. Until then, this document is our commitment to transparency. If you have questions that go beyond what is written here, please reach out.</p>
+  </section>
+
+  <!-- Contact -->
+  <section>
+    <div class="section-header">
+      <span class="section-icon">📬</span>
+      <h2>Have a security concern?</h2>
+    </div>
+    <div class="contact-box">
+      <div class="contact-icon">🔒</div>
+      <h3>Responsible disclosure</h3>
+      <p>Found a vulnerability, a design flaw, or something that doesn't add up? We want to hear about it. Send us a detailed report and we'll respond within 48 hours.</p>
+      <a href="mailto:hello@automaite.ca" class="contact-email">hello@automaite.ca</a>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo">automaite<span>.</span></div>
+      <p>Remote CLI Agent Manager</p>
+    </div>
+    <div class="footer-col">
+      <h4>Product</h4>
+      <a href="/">Terminal</a>
+    </div>
+    <div class="footer-col">
+      <h4>Legal</h4>
+      <a href="/terms.html">Terms of Service</a>
+      <a href="/privacy.html">Privacy Policy</a>
+      <a href="/security.html" class="active">Security</a>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <a href="mailto:hello@automaite.ca">hello@automaite.ca</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,9 @@
+# Desktop tray app
+pystray>=0.19.5
+Pillow>=10.0.0
+requests>=2.31.0
+pyinstaller>=6.0
+# Agent
+websockets>=14.0
+pywinpty>=2.0.0
+cryptography>=42.0.0

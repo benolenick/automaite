@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0a0a0f">
+  <title>Automaite Terminal</title>
+  <link rel="stylesheet" href="/lib/xterm.css">
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <!-- Login (cloud mode only — hidden in local mode) -->
+  <div id="login-screen">
+    <h1>Automaite Terminal</h1>
+    <p class="sub">Remote CLI Agent Manager</p>
+    <div id="google-btn-container"></div>
+    <div id="login-error"></div>
+  </div>
+
+  <!-- App -->
+  <div id="app-screen">
+    <div id="top-bar">
+      <div id="agent-status" title="Agent disconnected"></div>
+      <div id="tab-bar"></div>
+      <button id="btn-settings" title="Settings">&#9881;</button>
+      <button id="btn-toggle-view" title="Toggle clean/raw view">&#9689;</button>
+      <button id="btn-vault" title="Credential Vault">&#128272;</button>
+      <button id="btn-new-session" title="New session">+</button>
+    </div>
+    <div id="terminal-container">
+      <div id="no-sessions">
+        <div id="setup-guide" style="display:none; max-width:360px; text-align:center;">
+          <div style="font-size:48px; margin-bottom:12px;">&#128421;</div>
+          <div style="font-size:15px; font-weight:600; margin-bottom:8px; color:#a78bfa;">Connect Your Desktop</div>
+          <div style="font-size:13px; color:#71717a; line-height:1.6; margin-bottom:16px;">
+            To use Automaite, run the desktop app on your computer.<br>
+            It connects your AI agents (Claude, Gemini, Codex) to this dashboard.
+          </div>
+          <div style="font-size:12px; color:#525252; line-height:1.8;">
+            <strong style="color:#a1a1aa;">Step 1:</strong> Download the desktop app from <a href="https://automaite.ca" target="_blank" style="color:#a78bfa;">automaite.ca</a><br>
+            <strong style="color:#a1a1aa;">Step 2:</strong> Run it and pair with your Google account<br>
+            <strong style="color:#a1a1aa;">Step 3:</strong> Come back here and launch an agent session
+          </div>
+          <div style="margin-top:16px; font-size:11px; color:#3f3f46;">Waiting for desktop agent to connect...</div>
+        </div>
+        <div id="connected-empty">
+          <div>No active sessions</div>
+          <button id="btn-launch-agent">Launch Agent</button>
+        </div>
+      </div>
+    </div>
+    <div id="special-keys">
+      <button class="skey" data-key="tab">TAB</button>
+      <button class="skey" data-key="up">UP</button>
+      <button class="skey" data-key="down">DN</button>
+      <button class="skey enter-key" data-key="enter">ENTER</button>
+    </div>
+    <div id="input-bar">
+      <input type="text" id="term-input" placeholder="Type here..." autocomplete="one-time-code" autocapitalize="off" autocorrect="off" spellcheck="false" inputmode="text" name="terminal-x" data-lpignore="true" data-1p-ignore data-form-type="other">
+      <button id="send-btn">Enter</button>
+    </div>
+  </div>
+
+  <!-- New Session Modal -->
+  <div id="modal-overlay">
+    <div id="modal">
+      <h2>Launch Agent</h2>
+
+      <!-- Playbook selector -->
+      <div id="playbook-selector" class="modal-section">
+        <label>Playbook</label>
+        <div id="playbook-chips" class="playbook-chips">
+          <!-- chips rendered by JS -->
+        </div>
+        <div id="playbook-preview" class="playbook-preview" style="display:none">
+          <div id="playbook-preview-text"></div>
+        </div>
+        <button type="button" class="link-btn" id="btn-manage-playbooks">Manage Playbooks</button>
+      </div>
+
+      <!-- Agent install status (populated by /api/agents in local mode) -->
+      <div id="agent-install-status" style="display:none">
+        <div class="modal-section">
+          <label>Detected Agents</label>
+          <div id="agent-status-list"></div>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <label>Agent</label>
+        <div class="option-group" id="agent-select">
+          <button class="option-btn selected" data-value="claude">Claude Code</button>
+          <button class="option-btn" data-value="gemini">Gemini CLI</button>
+          <button class="option-btn" data-value="codex">Codex CLI</button>
+        </div>
+      </div>
+
+      <!-- Claude options -->
+      <div id="claude-options">
+        <div class="modal-section">
+          <label>Model</label>
+          <div class="option-group" data-group="claude-model">
+            <button class="option-btn selected" data-value="claude-opus-4-6">Opus</button>
+            <button class="option-btn" data-value="claude-sonnet-4-6">Sonnet</button>
+          </div>
+        </div>
+        <div class="modal-section">
+          <label>Permissions</label>
+          <div class="option-group" data-group="claude-perms">
+            <button class="option-btn" data-value="dangerous">Dangerous</button>
+            <button class="option-btn" data-value="less-dangerous">Less Dangerous</button>
+            <button class="option-btn selected" data-value="regular">Regular</button>
+          </div>
+        </div>
+        <div class="modal-section">
+          <label>Effort</label>
+          <div class="option-group" data-group="claude-effort">
+            <button class="option-btn selected" data-value="high">High</button>
+            <button class="option-btn" data-value="regular">Regular</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gemini options -->
+      <div id="gemini-options" style="display:none">
+        <div class="modal-section">
+          <label>Model</label>
+          <div class="option-group" data-group="gemini-model">
+            <button class="option-btn selected" data-value="auto">Auto</button>
+            <button class="option-btn" data-value="flash">Flash</button>
+            <button class="option-btn" data-value="pro">Pro</button>
+          </div>
+        </div>
+        <div class="modal-section">
+          <label>Approval</label>
+          <div class="option-group" data-group="gemini-approval">
+            <button class="option-btn selected" data-value="default">Default</button>
+            <button class="option-btn" data-value="auto-edit">Auto Edit</button>
+            <button class="option-btn" data-value="yolo">YOLO</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Codex options -->
+      <div id="codex-options" style="display:none">
+        <div class="modal-section">
+          <label>Approval Mode</label>
+          <div class="option-group" data-group="codex-approval">
+            <button class="option-btn selected" data-value="suggest">Suggest</button>
+            <button class="option-btn" data-value="auto-edit">Auto Edit</button>
+            <button class="option-btn" data-value="full-auto">Full Auto</button>
+          </div>
+        </div>
+      </div>
+
+      <button id="modal-launch">Launch</button>
+      <button id="modal-cancel">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Playbook Editor Overlay -->
+  <div id="playbook-editor-overlay">
+    <div id="playbook-editor">
+      <h2 id="pb-editor-title">New Playbook</h2>
+
+      <div class="modal-section">
+        <label>Name</label>
+        <input type="text" id="pb-name" class="editor-input" placeholder="e.g. Automaite Bug Fix">
+      </div>
+
+      <div class="modal-section">
+        <label>Agent</label>
+        <div class="option-group" id="pb-agent-select">
+          <button class="option-btn selected" data-value="claude">Claude Code</button>
+          <button class="option-btn" data-value="gemini">Gemini CLI</button>
+          <button class="option-btn" data-value="codex">Codex CLI</button>
+        </div>
+      </div>
+
+      <!-- Claude config -->
+      <div id="pb-claude-options">
+        <div class="modal-section">
+          <label>Model</label>
+          <div class="option-group" data-group="pb-claude-model">
+            <button class="option-btn selected" data-value="claude-opus-4-6">Opus</button>
+            <button class="option-btn" data-value="claude-sonnet-4-6">Sonnet</button>
+          </div>
+        </div>
+        <div class="modal-section">
+          <label>Permissions</label>
+          <div class="option-group" data-group="pb-claude-perms">
+            <button class="option-btn" data-value="dangerous">Dangerous</button>
+            <button class="option-btn" data-value="less-dangerous">Less Dangerous</button>
+            <button class="option-btn selected" data-value="regular">Regular</button>
+          </div>
+        </div>
+        <div class="modal-section">
+          <label>Effort</label>
+          <div class="option-group" data-group="pb-claude-effort">
+            <button class="option-btn selected" data-value="high">High</button>
+            <button class="option-btn" data-value="regular">Regular</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gemini config -->
+      <div id="pb-gemini-options" style="display:none">
+        <div class="modal-section">
+          <label>Model</label>
+          <div class="option-group" data-group="pb-gemini-model">
+            <button class="option-btn selected" data-value="auto">Auto</button>
+            <button class="option-btn" data-value="flash">Flash</button>
+            <button class="option-btn" data-value="pro">Pro</button>
+          </div>
+        </div>
+        <div class="modal-section">
+          <label>Approval</label>
+          <div class="option-group" data-group="pb-gemini-approval">
+            <button class="option-btn selected" data-value="default">Default</button>
+            <button class="option-btn" data-value="auto-edit">Auto Edit</button>
+            <button class="option-btn" data-value="yolo">YOLO</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Codex config -->
+      <div id="pb-codex-options" style="display:none">
+        <div class="modal-section">
+          <label>Approval Mode</label>
+          <div class="option-group" data-group="pb-codex-approval">
+            <button class="option-btn selected" data-value="suggest">Suggest</button>
+            <button class="option-btn" data-value="auto-edit">Auto Edit</button>
+            <button class="option-btn" data-value="full-auto">Full Auto</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <label>Instructions</label>
+        <textarea id="pb-instructions" class="editor-textarea" rows="8" placeholder="Paste the full prompt / instructions for the agent..."></textarea>
+      </div>
+
+      <div class="pb-editor-actions">
+        <button id="pb-save" class="btn-primary">Save</button>
+        <button id="pb-delete" class="btn-danger" style="display:none">Delete</button>
+        <button id="pb-cancel" class="btn-secondary">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Settings Modal -->
+  <div id="settings-overlay">
+    <div id="settings-modal">
+      <h2>Settings</h2>
+      <p class="settings-sub">Your API keys are encrypted and stored on the server. They are injected as environment variables when you launch agent sessions.</p>
+
+      <div class="modal-section">
+        <label>Anthropic API Key <span class="key-hint">(for Claude Code)</span></label>
+        <div class="key-input-row">
+          <input type="password" id="key-anthropic" class="key-input" placeholder="sk-ant-..." autocomplete="off">
+          <button class="key-toggle" data-for="key-anthropic">Show</button>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <label>Google / Gemini API Key <span class="key-hint">(for Gemini CLI)</span></label>
+        <div class="key-input-row">
+          <input type="password" id="key-gemini" class="key-input" placeholder="AIza..." autocomplete="off">
+          <button class="key-toggle" data-for="key-gemini">Show</button>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <label>OpenAI API Key <span class="key-hint">(for Codex CLI)</span></label>
+        <div class="key-input-row">
+          <input type="password" id="key-openai" class="key-input" placeholder="sk-..." autocomplete="off">
+          <button class="key-toggle" data-for="key-openai">Show</button>
+        </div>
+      </div>
+
+      <div id="settings-status"></div>
+      <div class="settings-actions">
+        <button id="settings-save" class="btn-primary">Save Keys</button>
+        <button id="settings-close" class="btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+
+  <div id="vault-overlay">
+    <!-- Credential Approval Card (shown when agent requests a credential) -->
+    <div id="vault-approval" style="display:none">
+      <div class="vault-card">
+        <div class="vault-card-icon">&#128272;</div>
+        <h3>Credential Request</h3>
+        <div class="vault-field">
+          <label>Agent</label>
+          <div id="vault-agent-name" class="vault-value">&#8212;</div>
+        </div>
+        <div class="vault-field">
+          <label>Credential</label>
+          <div id="vault-cred-name" class="vault-value">&#8212;</div>
+        </div>
+        <div class="vault-field">
+          <label>Reason</label>
+          <div id="vault-reason" class="vault-value">&#8212;</div>
+        </div>
+        <div id="vault-saved-match" class="vault-field" style="display:none">
+          <label>Saved Credential</label>
+          <button id="vault-use-saved" class="vault-saved-btn">Use saved</button>
+        </div>
+        <div id="vault-manual-section" class="vault-field">
+          <label id="vault-input-label">Value</label>
+          <input type="password" id="vault-cred-input" class="vault-input" placeholder="Paste credential value..." autocomplete="off">
+          <label class="vault-remember"><input type="checkbox" id="vault-remember-cb"> Save to vault</label>
+        </div>
+        <div class="vault-actions">
+          <button id="vault-deny" class="btn-danger">Deny</button>
+          <button id="vault-approve" class="btn-primary">Approve</button>
+        </div>
+      </div>
+    </div>
+    <!-- Vault List/Audit Log (shown when user clicks vault button) -->
+    <div id="vault-list" style="display:none">
+      <div class="vault-card">
+        <h3>Credential Vault</h3>
+        <div id="vault-pending-list"></div>
+        <div class="vault-section-label">Recent Activity</div>
+        <div id="vault-audit-list"></div>
+        <button id="vault-close" class="btn-secondary" style="margin-top:12px;width:100%">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/lib/xterm.js"></script>
+  <script src="/lib/xterm-addon-fit.js"></script>
+  <script src="/lib/xterm-addon-webgl.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+automaite.ca {
+	# API routes - keep existing backend
+	handle /api/* {
+		reverse_proxy api:8000
+	}
+
+	# Serve new static site
+	handle {
+		root * /srv/automaite-site
+		file_server
+		try_files {path} {path}.html /index.html
+	}
+}
+
+term.automaite.ca {
+	header {
+		Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+		Content-Security-Policy "default-src 'self'; script-src 'self' https://accounts.google.com https://js.stripe.com; style-src 'self' 'unsafe-inline' https://accounts.google.com; frame-src https://accounts.google.com https://checkout.stripe.com https://js.stripe.com; connect-src 'self' wss://term.automaite.ca https://accounts.google.com https://oauth2.googleapis.com https://checkout.stripe.com https://api.stripe.com; img-src 'self' https://*.googleusercontent.com; font-src 'self'"
+		X-Frame-Options "DENY"
+		Referrer-Policy "no-referrer"
+		X-Content-Type-Options "nosniff"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+		-Server
+	}
+	reverse_proxy relay:8080
+}

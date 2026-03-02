@@ -1,0 +1,53 @@
+# Secrets — never commit these
+.env
+*.env
+.env.*
+credentials.json
+config.json
+devices.json
+user_keys.json
+subscriptions.json
+
+# Compiled binaries — too large for git
+desktop/dist/
+desktop/build/
+*.exe
+*.apk
+*.aab
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+*.egg-info/
+
+# Node
+node_modules/
+
+# Android build outputs
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+
+# Desktop build artifacts
+desktop/.mypy_cache/
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Logs
+*.log
+logs/
+
+# Relay data volume (runtime only)
+relay/static/*.exe
+relay/static/*.apk
